@@ -1,6 +1,11 @@
 package config
 
-import "os"
+import (
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 // Конфиг
 type Config struct {
@@ -10,6 +15,10 @@ type Config struct {
 // Читает конфиг из переменных окружения
 func Read() Config {
 	var config Config
+
+	if err := godotenv.Load("local.env"); err != nil {
+		log.Fatalf("Config Read Error: %v", err)
+	}
 
 	httpAddr, exists := os.LookupEnv("HTTP_ADDR")
 	if exists {
