@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/p1xray/port-api/internal/config"
 	"github.com/p1xray/port-api/internal/controller"
+	"github.com/p1xray/port-api/internal/repository/inmem"
 	"github.com/p1xray/port-api/internal/services"
 )
 
@@ -26,8 +27,11 @@ func run() error {
 	// Читаем конфиг из переменных окружения
 	cfg := config.Read()
 
+	// Создаем необходимые репозитории
+	portRepository := inmem.NewPortRepository()
+
 	// Создаем необходимые сервисы
-	portService := services.NewPortService()
+	portService := services.NewPortService(portRepository)
 
 	// Создаем необходимые хэндлеры
 	portHandler := controller.NewPortHandler(portService)
