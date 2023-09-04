@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +11,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/p1xray/port-api/internal/config"
+	"github.com/p1xray/port-api/internal/controller"
+	"github.com/p1xray/port-api/internal/services"
 )
 
 func main() {
@@ -25,15 +26,15 @@ func run() error {
 	// Читаем конфиг из переменных окружения
 	cfg := config.Read()
 
-	// Http route для проверки работоспособности сервера
+	// Создаем необходимые сервисы
+	portService := services.NewPortService()
+
+	// Создаем необходимые хэндлеры
+	portHandler := controller.NewPortHandler(portService)
+
+	// Создаем необходимые роуты
 	router := mux.NewRouter()
-	router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(map[string]bool{
-			"pong": true,
-		})
-	}).Methods("GET")
+	router.HandleFunc("/port", portHandler.GetPort).Methods("GET")
 
 	server := &http.Server{
 		Addr:    cfg.HttpAddr,
