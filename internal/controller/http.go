@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/p1xray/port-api/internal/domain"
@@ -12,6 +13,7 @@ import (
 type PortService interface {
 	GetPort(ctx context.Context, id string) (*domain.Port, error)
 	CountPorts(ctx context.Context) (int, error)
+	CreateOrUpdatePort(ctx context.Context, port *domain.Port) error
 }
 
 // Обработчик запросов к портам
@@ -65,4 +67,55 @@ func (ph PortHandler) CountPorts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondOK(count, w, r)
+}
+
+// Загружает переданные в json формате порты в хранилище
+func (ph PortHandler) UploadPorts(w http.ResponseWriter, r *http.Request) {
+	log.Println("uploading ports")
+
+	// Канал для передачи распаршенных портов
+	portChan := make(chan Port)
+
+	// Канал для передачи ошибки парсинга
+	errChan := make(chan error)
+
+	// Канал для передачи завершения работы парсера
+	doneChan := make(chan struct{})
+
+	go func() {
+		err := parsePorts(r.Context(), r.Body, portChan)
+		if err != nil {
+			errChan <- err
+		} else {
+			doneChan <- struct{}{}
+		}
+	}()
+
+	portCnt := 0
+	for {
+		select {
+		case <-r.Context().Done():
+			log.Printf("request cancelled")
+			return
+		case <-doneChan:
+			log.Printf("finished reading ports")
+			RespondOK(portCnt, w, r)
+			return
+		case port := <-portChan:
+			portCnt++
+			log.Printf("[%d] received port: %+v", portCnt, port)
+
+			domainPort, err := port.ToDomain()
+			if err != nil {
+				BadRequest("port-to-domain", err, w, r)
+				return
+			}
+
+			if err := ph.portService.CreateOrUpdatePort(r.Context(), domainPort); err != nil {
+				RespondWithError(err, w, r)
+				return
+			}
+		}
+
+	}
 }
