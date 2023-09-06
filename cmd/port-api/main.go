@@ -40,6 +40,7 @@ func run() error {
 	router := mux.NewRouter()
 	router.HandleFunc("/port", portHandler.GetPort).Methods("GET")
 	router.HandleFunc("/count", portHandler.CountPorts).Methods("GET")
+	router.HandleFunc("/ports", portHandler.UploadPorts).Methods("POST")
 
 	server := &http.Server{
 		Addr:    cfg.HttpAddr,
