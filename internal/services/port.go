@@ -9,6 +9,7 @@ import (
 // Репозиторий портов
 type PortRepository interface {
 	GetPort(ctx context.Context, id string) (*domain.Port, error)
+	CountPorts(ctx context.Context) (int, error)
 }
 
 // Сервис портов
@@ -26,4 +27,9 @@ func NewPortService(pr PortRepository) PortService {
 // Возвращает порт по переданному идентификатору
 func (ps PortService) GetPort(ctx context.Context, id string) (*domain.Port, error) {
 	return ps.portRepo.GetPort(ctx, id)
+}
+
+// Возвращает количетсво хранящихся портов
+func (ps PortService) CountPorts(ctx context.Context) (int, error) {
+	return ps.portRepo.CountPorts(ctx)
 }
