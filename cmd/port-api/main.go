@@ -38,9 +38,9 @@ func run() error {
 
 	// Создаем необходимые роуты
 	router := mux.NewRouter()
-	router.HandleFunc("/port", portHandler.GetPort).Methods("GET")
-	router.HandleFunc("/count", portHandler.CountPorts).Methods("GET")
-	router.HandleFunc("/ports", portHandler.UploadPorts).Methods("POST")
+	router.HandleFunc("/port", portHandler.GetPort).Methods(http.MethodGet)
+	router.HandleFunc("/count", portHandler.CountPorts).Methods(http.MethodGet)
+	router.HandleFunc("/ports", portHandler.UploadPorts).Methods(http.MethodPost)
 
 	server := &http.Server{
 		Addr:    cfg.HttpAddr,
