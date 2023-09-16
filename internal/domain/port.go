@@ -65,6 +65,15 @@ func (p *Port) Name() string {
 	return p.name
 }
 
+func (p *Port) SetName(name string) error {
+	if name == "" {
+		return fmt.Errorf("%w: port name is required", ErrRequired)
+	}
+
+	p.name = name
+	return nil
+}
+
 // Возвращает код порта
 func (p *Port) Code() string {
 	return p.code
