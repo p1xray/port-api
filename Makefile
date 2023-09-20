@@ -10,7 +10,7 @@ run:
 	go run cmd/port-api/main.go
 
 test:
-	go test -race ./..
+	go test -v -race -timeout 30s ./...
 
 lint:
 	golangci-lint run
