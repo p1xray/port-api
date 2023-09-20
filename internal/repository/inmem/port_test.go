@@ -8,6 +8,7 @@ import (
 	"github.com/p1xray/port-api/internal/domain"
 	"github.com/p1xray/port-api/internal/repository/inmem"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPortRepository_CreateOrUpdatePort(t *testing.T) {
@@ -20,10 +21,10 @@ func TestPortRepository_CreateOrUpdatePort(t *testing.T) {
 
 		randomPort := newRandomDomainPort(t)
 		err := repo.CreateOrUpdatePort(context.Background(), randomPort)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		port, err := repo.GetPort(context.Background(), randomPort.Id())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, randomPort, port)
 	})
@@ -33,21 +34,21 @@ func TestPortRepository_CreateOrUpdatePort(t *testing.T) {
 
 		randomPort := newRandomDomainPort(t)
 		err := repo.CreateOrUpdatePort(context.Background(), randomPort)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		beforeUpdatePort, err := repo.GetPort(context.Background(), randomPort.Id())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, randomPort, beforeUpdatePort)
 
 		err = randomPort.SetName("new name")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = repo.CreateOrUpdatePort(context.Background(), randomPort)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		updatedPort, err := repo.GetPort(context.Background(), randomPort.Id())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.NotEqual(t, beforeUpdatePort.Name(), updatedPort.Name())
 	})
@@ -66,6 +67,6 @@ func newRandomDomainPort(t *testing.T) *domain.Port {
 	port, err := domain.NewPort(randomId, randomId, randomId, randomId, randomId,
 		[]string{randomId}, []string{randomId}, []float64{1.0, 2.0}, randomId, randomId, nil)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return port
 }

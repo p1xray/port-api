@@ -14,6 +14,7 @@ import (
 	"github.com/p1xray/port-api/internal/repository/inmem"
 	"github.com/p1xray/port-api/internal/services"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -41,15 +42,15 @@ func TestHttpTestSuite(t *testing.T) {
 
 func (suite *HttpTestSuite) TestUploadPorts() {
 	// Получаем json тело запроса из файла
-	portsRequest, err := os.ReadFile("testfixtures/ports_request.json")
-	assert.NoError(suite.T(), err)
+	portsRequest, err := os.ReadFile("testdata/ports_request.json")
+	require.NoError(suite.T(), err)
 
 	// Подсчитываем количество портов в полученном json
 	requestPortsTotal := countJsonPorts(suite.T(), portsRequest)
 
 	// Получаем json ответ от файла
-	portsResponse, err := os.ReadFile("testfixtures/ports_response.json")
-	assert.NoError(suite.T(), err)
+	portsResponse, err := os.ReadFile("testdata/ports_response.json")
+	require.NoError(suite.T(), err)
 
 	// Формируем запрос на загрузку портов
 	req := httptest.NewRequest(http.MethodPost, "/ports", bytes.NewBuffer(portsRequest))
@@ -64,14 +65,14 @@ func (suite *HttpTestSuite) TestUploadPorts() {
 
 	// Читаем тело ответа
 	data, err := io.ReadAll(res.Body)
-	assert.NoError(suite.T(), err)
+	require.NoError(suite.T(), err)
 
 	assert.Equal(suite.T(), http.StatusOK, res.StatusCode)
 	assert.Equal(suite.T(), portsResponse, data)
 
 	// Сравниваем количество портов в переданном json и в хранилище
 	storedPortsTotal, err := suite.portService.CountPorts(context.Background())
-	assert.NoError(suite.T(), err)
+	require.NoError(suite.T(), err)
 
 	assert.Equal(suite.T(), requestPortsTotal, storedPortsTotal)
 }
@@ -88,7 +89,7 @@ func (suite *HttpTestSuite) TestUploadPorts_badJson() {
 	res := w.Result()
 	defer res.Body.Close()
 
-	assert.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
+	require.Equal(suite.T(), http.StatusBadRequest, res.StatusCode)
 }
 
 func countJsonPorts(t *testing.T, portsJson []byte) int {
@@ -96,6 +97,6 @@ func countJsonPorts(t *testing.T, portsJson []byte) int {
 
 	var ports map[string]struct{}
 	err := json.Unmarshal(portsJson, &ports)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	return len(ports)
 }

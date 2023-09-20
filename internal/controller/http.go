@@ -99,7 +99,11 @@ func (ph PortHandler) UploadPorts(w http.ResponseWriter, r *http.Request) {
 			return
 		case <-doneChan:
 			log.Printf("finished reading ports")
-			RespondOK(portCnt, w, r)
+			RespondOK(map[string]int{"total_ports": portCnt}, w, r)
+			return
+		case err := <-errChan:
+			log.Printf("error while parsing port json: %+v", err)
+			BadRequest("invalid-json", err, w, r)
 			return
 		case port := <-portChan:
 			portCnt++
